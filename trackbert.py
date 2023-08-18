@@ -96,6 +96,13 @@ def start_loop(db, api: KeyDelivery):
             description = shipment[3]
             latest_known_event = get_latest_event(db, shipment_id)
             all_events = api.realtime(carrier, tracking_number)
+
+            try:
+                all_events["data"]["items"]
+            except KeyError:
+                print(f"Error getting events for {tracking_number}: {all_events}")
+                continue
+
             for event in all_events["data"]["items"]:
                 if latest_known_event is None or event["time"] > latest_known_event[3]:
                     create_event(
@@ -105,8 +112,9 @@ def start_loop(db, api: KeyDelivery):
                         event["context"],
                         event,
                     )
-                    print(f"New event for {tracking_number}: {event['context']}")
-                    notify(f"New event for {description}", event["context"])
+
+                    print(f"New event for {tracking_number}: {event['context']} - {event['time']}")
+                    notify(f"New event for {description or tracking_number}", event["context"] + " - " + event["time"])
 
         time.sleep(300)
 

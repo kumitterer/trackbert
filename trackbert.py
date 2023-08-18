@@ -4,6 +4,7 @@ import sqlite3
 import json
 import time
 import subprocess
+import argparse
 
 
 def notify(title, message):
@@ -118,4 +119,21 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--tracking-number", "-n", type=str, required=False)
+    parser.add_argument("--carrier", "-c", type=str, required=False)
+    parser.add_argument("--description", "-d", type=str, required=False)
+    args = parser.parse_args()
+
+    if args.tracking_number is not None and args.carrier is not None:
+        db = get_db()
+        create_shipment(db, args.tracking_number, args.carrier, args.description)
+        print(f"Created shipment for {args.tracking_number} with carrier {args.carrier}")
+        exit(0)
+
+    if args.tracking_number is not None:
+        print("You must specify a carrier with -c")
+        exit(1)
+
     main()

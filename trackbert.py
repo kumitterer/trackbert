@@ -7,8 +7,12 @@ import subprocess
 import argparse
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
+# Print date and time and level with message
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s: %(message)s",
+    level=logging.DEBUG,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 def notify(title, message):
     logging.debug(f"Sending notification: {title} - {message}")
@@ -117,7 +121,7 @@ def start_loop(db, api: KeyDelivery):
             all_events = api.realtime(carrier, tracking_number)
 
             try:
-                all_events["data"]["items"]
+                logging.debug(f"Got events for {tracking_number}: {len(all_events)}")
             except KeyError:
                 print(f"Error getting events for {tracking_number}: {all_events}")
                 continue

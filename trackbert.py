@@ -7,6 +7,7 @@ import subprocess
 import argparse
 import logging
 
+from pathlib import Path
 from typing import Tuple, Never
 
 # Print date and time and level with message
@@ -16,7 +17,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-def notify(title: str, message: str):
+def notify(title: str, message: str, urgency: str = "normal", timeout: int = 5000):
     """Send a desktop notification
 
     If notify-send is not found, this function will do nothing.
@@ -32,9 +33,12 @@ def notify(title: str, message: str):
         subprocess.run(
             [
                 "notify-send",
+                "-a", "trackbert",
+                "-u", urgency,
+                "-t", str(timeout),
+                "-i", str(Path(__file__).parent / "assets" / "parcel-delivery-icon.webp"),
                 title,
                 message,
-                # TODO: Look into other options, like adding an icon
             ]
         )
 
@@ -256,9 +260,14 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
 
+    # Shipment creation arguments
     parser.add_argument("--tracking-number", "-n", type=str, required=False)
     parser.add_argument("--carrier", "-c", type=str, required=False)
     parser.add_argument("--description", "-d", type=str, required=False)
+
+    # Notification arguments
+
+
     args = parser.parse_args()
 
     # If the user specified a tracking number and carrier, create a shipment and exit

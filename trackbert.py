@@ -223,7 +223,7 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
 
             events = sorted(all_events["data"]["items"], key=lambda x: x["time"], reverse=True)
 
-            logging.debug(f"Latest known event for {tracking_number}: {latest_known_event[3]}")
+            logging.debug(f"Latest known event for {tracking_number}: {latest_known_event[3]} - {latest_known_event[2]}")
             logging.debug(f"Latest upstream event for {tracking_number}: {events[0]['context']} - {events[0]['time']}")
 
             for event in events:

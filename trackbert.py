@@ -221,7 +221,12 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
                 print(f"Error getting events for {tracking_number}: {all_events}")
                 continue
 
-            for event in all_events["data"]["items"]:
+            events = sorted(all_events["data"]["items"], key=lambda x: x["time"], reverse=True)
+
+            logging.debug(f"Latest known event for {tracking_number}: {latest_known_event[3]}")
+            logging.debug(f"Latest upstream event for {tracking_number}: {events[0]['context']} - {events[0]['time']}")
+
+            for event in events:
                 if latest_known_event is None or event["time"] > latest_known_event[3]:
                     create_event(
                         db,

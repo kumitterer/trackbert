@@ -8,7 +8,7 @@ import argparse
 import logging
 
 from pathlib import Path
-from typing import Tuple, Never
+from typing import Tuple, Never, Optional
 
 # Print date and time and level with message
 logging.basicConfig(
@@ -17,7 +17,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-def notify(title: str, message: str, urgency: str = "normal", timeout: int = 5000):
+def notify(title: str, message: str, urgency: str = "normal", timeout: Optional[int] = 5000):
     """Send a desktop notification
 
     If notify-send is not found, this function will do nothing.
@@ -25,22 +25,26 @@ def notify(title: str, message: str, urgency: str = "normal", timeout: int = 500
     Args:
         title (str): The title of the notification
         message (str): The message of the notification
+        urgency (str, optional): The urgency of the notification. Defaults to "normal".
+        timeout (int, optional): The timeout of the notification in milliseconds. Defaults to 5000.
     """
 
     logging.debug(f"Sending notification: {title} - {message}")
 
-    try:
-        subprocess.run(
-            [
+    command = [
                 "notify-send",
                 "-a", "trackbert",
                 "-u", urgency,
-                "-t", str(timeout),
                 "-i", str(Path(__file__).parent / "assets" / "parcel-delivery-icon.webp"),
-                title,
-                message,
             ]
-        )
+
+    if timeout:
+        command += ["-t", str(timeout)]
+
+    command = command + [title, message]
+
+    try:
+        subprocess.run(command)
 
     except FileNotFoundError:
         # If notify-send is not found, do nothing
@@ -230,6 +234,8 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
             logging.debug(f"Latest known event for {tracking_number}: {latest_known_event[3]} - {latest_known_event[2]}")
             logging.debug(f"Latest upstream event for {tracking_number}: {events[0]['context']} - {events[0]['time']}")
 
+            latest = True
+
             for event in events:
                 if latest_known_event is None or event["time"] > latest_known_event[2]:
                     create_event(
@@ -241,7 +247,9 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
                     )
 
                     logging.info(f"New event for {tracking_number}: {event['context']} - {event['time']}")
-                    notify(f"New event for {description or tracking_number}", event["context"] + " - " + event["time"])
+                    notify(f"New event for {description or tracking_number}", event["context"] + " - " + event["time"], urgency="critical" if latest else "normal")
+
+                    latest = False
 
         time.sleep(300)
 
@@ -266,7 +274,7 @@ if __name__ == "__main__":
     parser.add_argument("--description", "-d", type=str, required=False)
 
     # Notification arguments
-
+    parser.add_argument("--timeout", "-t", type=int, required=False, default=30, help="Notification timeout in seconds")
 
     args = parser.parse_args()
 

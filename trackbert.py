@@ -227,7 +227,7 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
             logging.debug(f"Latest upstream event for {tracking_number}: {events[0]['context']} - {events[0]['time']}")
 
             for event in events:
-                if latest_known_event is None or event["time"] > latest_known_event[3]:
+                if latest_known_event is None or event["time"] > latest_known_event[2]:
                     create_event(
                         db,
                         shipment_id,

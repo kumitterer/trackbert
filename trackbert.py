@@ -221,10 +221,11 @@ def start_loop(db: sqlite3.Connection, api: KeyDelivery) -> Never:
             logging.debug(f"Checking shipment {tracking_number} with carrier {carrier}")
 
             latest_known_event = get_latest_event(db, shipment_id)
+
             all_events = api.realtime(carrier, tracking_number)
 
             try:
-                logging.debug(f"Got events for {tracking_number}: {len(all_events)}")
+                logging.debug(f"Got events for {tracking_number}: {len(all_events['data']['items'])}")
             except KeyError:
                 print(f"Error getting events for {tracking_number}: {all_events}")
                 continue

@@ -1,1 +1,3 @@
-git+https://kumig.it/kumitterer/pykeydelivery.git
+pykeydelivery
+postat
+sqlalchemy

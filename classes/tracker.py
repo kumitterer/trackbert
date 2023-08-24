@@ -14,6 +14,7 @@ from pykeydelivery import KeyDelivery
 
 class Tracker:
     loop_interval = 60
+    loop_timeout = 30
 
     def __init__(self):
         logging.basicConfig(
@@ -158,10 +159,14 @@ class Tracker:
         while True:
             tasks = []
             for shipment in self.db.get_shipments():
-                task = asyncio.create_task(asyncio.to_thread(self.process_shipment, shipment))
+                task = asyncio.wait_for(asyncio.to_thread(self.process_shipment, shipment), timeout=self.loop_timeout)
                 tasks.append(task)
 
-            await asyncio.gather(*tasks)
+            try:
+                await asyncio.gather(*tasks)
+            except asyncio.TimeoutError:
+                logging.warning("Timeout while processing shipments")
+                
             await asyncio.sleep(self.loop_interval)
 
     def start(self):

@@ -5,6 +5,7 @@ import time
 import subprocess
 import argparse
 import logging
+import asyncio
 from typing import Tuple, Never, Optional
 
 from classes.database import Database
@@ -74,4 +75,4 @@ if __name__ == "__main__":
         exit(1)
 
     tracker = Tracker()
-    tracker.start()
+    asyncio.run(tracker.start_async())

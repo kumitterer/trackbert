@@ -90,7 +90,7 @@ class Tracker:
         except FileNotFoundError:
             logging.warning("notify-send not found, not sending notification")
 
-    def notify_event(self, shipment, event, critical = False) -> None:
+    def notify_event(self, shipment, event, critical=False) -> None:
         logging.info(
             f"New event for {shipment.tracking_number}: {event.event_description} - {event.event_time}"
         )
@@ -141,7 +141,6 @@ class Tracker:
                 self.db.write_event(event)
                 self.notify_event(shipment, event, event == events[0])
 
-
     def start_loop(self) -> Never:
         logging.debug("Starting loop")
 
@@ -159,14 +158,17 @@ class Tracker:
         while True:
             tasks = []
             for shipment in self.db.get_shipments():
-                task = asyncio.wait_for(asyncio.to_thread(self.process_shipment, shipment), timeout=self.loop_timeout)
+                task = asyncio.wait_for(
+                    asyncio.to_thread(self.process_shipment, shipment),
+                    timeout=self.loop_timeout,
+                )
                 tasks.append(task)
 
             try:
                 await asyncio.gather(*tasks)
             except asyncio.TimeoutError:
                 logging.warning("Timeout while processing shipments")
-                
+
             await asyncio.sleep(self.loop_interval)
 
     def start(self):

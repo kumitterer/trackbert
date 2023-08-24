@@ -10,7 +10,7 @@ class BaseTracker:
         """Defines the carriers supported by this tracker.
 
         Returns:
-            list: List of supported carriers as tuples of (carrier_code, priority), 
+            list: List of supported carriers as tuples of (carrier_code, priority),
                 where priority is an integer. The carrier with the highest priority
                 will be used when tracking a shipment. "*" can be used as a wildcard
                 to match all carriers.

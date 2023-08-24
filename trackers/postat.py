@@ -6,6 +6,7 @@ import json
 from dateutil.parser import parse
 from postat.classes.api import PostAPI
 
+
 class PostAT(BaseTracker):
     def __init__(self, *args, **kwargs):
         pass
@@ -21,10 +22,10 @@ class PostAT(BaseTracker):
             py_timestamp = parse(timestamp)
             event_time = py_timestamp.strftime("%Y-%m-%d %H:%M:%S")
             yield Event(
-                shipment_id = 0,
-                event_time = event_time,
-                event_description = event["text"],
-                raw_event = json.dumps(event)
+                shipment_id=0,
+                event_time=event_time,
+                event_description=event["text"],
+                raw_event=json.dumps(event),
             )
 
     @staticmethod
@@ -32,5 +33,6 @@ class PostAT(BaseTracker):
         return [
             ("austrian_post", 100),
         ]
+
 
 tracker = PostAT

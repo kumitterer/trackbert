@@ -10,6 +10,7 @@ from trackers.base import BaseTracker
 
 from pykeydelivery import KeyDelivery
 
+
 class Tracker:
     def __init__(self):
         logging.basicConfig(
@@ -44,24 +45,35 @@ class Tracker:
                         self.apis.append((carrier, priority, api))
                 except:
                     logging.exception(f"Error loading tracker {name}")
-        
+
     def query_api(self, tracking_number: str, carrier: str) -> list:
         logging.debug(f"Querying API for {tracking_number} with carrier {carrier}")
 
         for api_carrier, _, api in sorted(self.apis, key=lambda x: x[1], reverse=True):
             if api_carrier == "*" or api_carrier == carrier:
-                logging.debug(f"Using API {api.__class__.__name__} for {tracking_number} with carrier {carrier}")
+                logging.debug(
+                    f"Using API {api.__class__.__name__} for {tracking_number} with carrier {carrier}"
+                )
                 return list(api.get_status(tracking_number, carrier))
 
-    def notify(self, title: str, message: str, urgency: str = "normal", timeout: Optional[int] = 5000) -> None:
+    def notify(
+        self,
+        title: str,
+        message: str,
+        urgency: str = "normal",
+        timeout: Optional[int] = 5000,
+    ) -> None:
         logging.debug(f"Sending notification: {title} - {message}")
 
         command = [
-                    "notify-send",
-                    "-a", "trackbert",
-                    "-u", urgency,
-                    "-i", str(Path(__file__).parent.parent / "assets" / "parcel-delivery-icon.webp"),
-                ]
+            "notify-send",
+            "-a",
+            "trackbert",
+            "-u",
+            urgency,
+            "-i",
+            str(Path(__file__).parent.parent / "assets" / "parcel-delivery-icon.webp"),
+        ]
 
         if timeout:
             command += ["-t", str(timeout)]
@@ -79,40 +91,56 @@ class Tracker:
 
         while True:
             for shipment in self.db.get_shipments():
-                shipment_id = shipment.id
-                tracking_number = shipment.tracking_number
-                carrier = shipment.carrier
-                description = shipment.description
+                if not shipment.carrier:
+                    logging.warning(
+                        f"Shipment {shipment.tracking_number} has no carrier, skipping"
+                    )
+                    continue
 
-                logging.debug(f"Checking shipment {tracking_number} with carrier {carrier}")
+                logging.debug(
+                    f"Checking shipment {shipment.tracking_number} with carrier {shipment.carrier}"
+                )
 
-                latest_known_event = self.db.get_latest_event(shipment_id)
+                latest_known_event = self.db.get_latest_event(shipment.id)
 
-                events = self.query_api(tracking_number, carrier)
+                events = self.query_api(shipment.tracking_number, shipment.carrier)
                 events = sorted(events, key=lambda x: x.event_time, reverse=True)
 
                 if latest_known_event:
-                    logging.debug(f"Latest known event for {tracking_number}: {latest_known_event.event_description} - {latest_known_event.event_time}")
+                    logging.debug(
+                        f"Latest known event for {shipment.tracking_number}: {latest_known_event.event_description} - {latest_known_event.event_time}"
+                    )
                 else:
-                    logging.debug(f"No known events for {tracking_number}")
+                    logging.debug(f"No known events for {shipment.tracking_number}")
 
-                logging.debug(f"Latest upstream event for {tracking_number}: {events[0].event_description} - {events[0].event_time}")
+                logging.debug(
+                    f"Latest upstream event for {shipment.tracking_number}: {events[0].event_description} - {events[0].event_time}"
+                )
 
                 latest = True
 
                 for event in events:
-                    if latest_known_event is None or event.event_time > latest_known_event.event_time:
-                        event.shipment_id = shipment_id
+                    if (
+                        latest_known_event is None
+                        or event.event_time > latest_known_event.event_time
+                    ):
+                        event.shipment_id = shipment.id
                         self.db.write_event(event)
 
-                        logging.info(f"New event for {tracking_number}: {event.event_description} - {event.event_time}")
-                        self.notify(f"New event for {description or tracking_number}", event.event_description + " - " + event.event_time, urgency="critical" if latest else "normal")
+                        logging.info(
+                            f"New event for {shipment.tracking_number}: {event.event_description} - {event.event_time}"
+                        )
+                        self.notify(
+                            f"New event for {shipment.description or shipment.tracking_number}",
+                            event.event_description + " - " + event.event_time,
+                            urgency="critical" if latest else "normal",
+                        )
 
                         latest = False
 
             time.sleep(300)
 
     def start(self):
-        self.db = Database('sqlite:///trackbert.db')
+        self.db = Database("sqlite:///trackbert.db")
         self.notify("Trackbert", "Starting up")
         self.start_loop()

@@ -89,6 +89,7 @@ class Tracker:
                 latest_known_event = self.db.get_latest_event(shipment_id)
 
                 events = self.query_api(tracking_number, carrier)
+                events = sorted(events, key=lambda x: x.event_time, reverse=True)
 
                 if latest_known_event:
                     logging.debug(f"Latest known event for {tracking_number}: {latest_known_event.event_description} - {latest_known_event.event_time}")

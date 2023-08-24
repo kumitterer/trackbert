@@ -1,10 +1,12 @@
 import logging
 import subprocess
 import time
+import importlib
 from pathlib import Path
 from typing import Optional, Tuple, Never
 
 from .database import Database
+from trackers.base import BaseTracker
 
 from pykeydelivery import KeyDelivery
 
@@ -15,6 +17,41 @@ class Tracker:
             level=logging.DEBUG,
             datefmt="%Y-%m-%d %H:%M:%S",
         )
+
+        self.find_apis()
+
+    def find_apis(self):
+        logging.debug("Finding APIs")
+
+        self.apis = []
+
+        for api in Path(__file__).parent.parent.glob("trackers/*.py"):
+            if api.name in ("__init__.py", "base.py"):
+                continue
+
+            logging.debug(f"Found API {api.stem}")
+
+            module = importlib.import_module(f"trackers.{api.stem}")
+
+            if "tracker" in module.__dict__:
+                tracker = module.tracker
+                logging.debug(f"Found tracker {api.stem}")
+                try:
+                    carriers = tracker.supported_carriers()
+                    api = tracker()
+
+                    for carrier, priority in carriers:
+                        self.apis.append((carrier, priority, api))
+                except:
+                    logging.exception(f"Error loading tracker {name}")
+        
+    def query_api(self, tracking_number: str, carrier: str) -> list:
+        logging.debug(f"Querying API for {tracking_number} with carrier {carrier}")
+
+        for api_carrier, _, api in sorted(self.apis, key=lambda x: x[1], reverse=True):
+            if api_carrier == "*" or api_carrier == carrier:
+                logging.debug(f"Using API {api.__class__.__name__} for {tracking_number} with carrier {carrier}")
+                return list(api.get_status(tracking_number, carrier))
 
     def notify(self, title: str, message: str, urgency: str = "normal", timeout: Optional[int] = 5000) -> None:
         logging.debug(f"Sending notification: {title} - {message}")
@@ -39,6 +76,7 @@ class Tracker:
 
     def start_loop(self) -> Never:
         logging.debug("Starting loop")
+
         while True:
             for shipment in self.db.get_shipments():
                 shipment_id = shipment.id
@@ -50,36 +88,23 @@ class Tracker:
 
                 latest_known_event = self.db.get_latest_event(shipment_id)
 
-                all_events = self.api.realtime(carrier, tracking_number)
-
-                try:
-                    logging.debug(f"Got events for {tracking_number}: {len(all_events['data']['items'])}")
-                except KeyError:
-                    print(f"Error getting events for {tracking_number}: {all_events}")
-                    continue
-
-                events = sorted(all_events["data"]["items"], key=lambda x: x["time"], reverse=True)
+                events = self.query_api(tracking_number, carrier)
 
                 if latest_known_event:
                     logging.debug(f"Latest known event for {tracking_number}: {latest_known_event.event_description} - {latest_known_event.event_time}")
                 else:
                     logging.debug(f"No known events for {tracking_number}")
 
-                logging.debug(f"Latest upstream event for {tracking_number}: {events[0]['context']} - {events[0]['time']}")
+                logging.debug(f"Latest upstream event for {tracking_number}: {events[0].event_description} - {events[0].event_time}")
 
                 latest = True
 
                 for event in events:
-                    if latest_known_event is None or event["time"] > latest_known_event.event_time:
-                        self.db.create_event(
-                            shipment_id,
-                            event["time"],
-                            event["context"],
-                            event,
-                        )
+                    if latest_known_event is None or event.event_time > latest_known_event.event_time:
+                        self.db.write_event(event)
 
-                        logging.info(f"New event for {tracking_number}: {event['context']} - {event['time']}")
-                        self.notify(f"New event for {description or tracking_number}", event["context"] + " - " + event["time"], urgency="critical" if latest else "normal")
+                        logging.info(f"New event for {tracking_number}: {event.event_description} - {event.event_time}")
+                        self.notify(f"New event for {description or tracking_number}", event.event_description + " - " + event.event_time, urgency="critical" if latest else "normal")
 
                         latest = False
 
@@ -87,6 +112,5 @@ class Tracker:
 
     def start(self):
         self.db = Database('sqlite:///trackbert.db')
-        self.api = KeyDelivery.from_config("config.ini")
         self.notify("Trackbert", "Starting up")
         self.start_loop()

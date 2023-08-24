@@ -50,7 +50,10 @@ class Database:
             raw_event = json.dumps(raw_event)
 
         new_event = Event(shipment_id=shipment_id, event_time=event_time, event_description=event_description, raw_event=raw_event)
-        self.session.add(new_event)
+        self.write_event(new_event)
+
+    def write_event(self, event):
+        self.session.add(event)
         self.session.commit()
 
     def get_shipment_events(self, shipment_id):

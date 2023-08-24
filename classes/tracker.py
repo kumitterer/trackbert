@@ -60,7 +60,7 @@ class Tracker:
                     "notify-send",
                     "-a", "trackbert",
                     "-u", urgency,
-                    "-i", str(Path(__file__).parent / "assets" / "parcel-delivery-icon.webp"),
+                    "-i", str(Path(__file__).parent.parent / "assets" / "parcel-delivery-icon.webp"),
                 ]
 
         if timeout:

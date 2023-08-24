@@ -21,7 +21,7 @@ class PostAT(BaseTracker):
             py_timestamp = parse(timestamp)
             event_time = py_timestamp.strftime("%Y-%m-%d %H:%M:%S")
             yield Event(
-                shipment_id = tracking_number,
+                shipment_id = 0,
                 event_time = event_time,
                 event_description = event["text"],
                 raw_event = json.dumps(event)

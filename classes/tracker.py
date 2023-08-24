@@ -102,6 +102,7 @@ class Tracker:
 
                 for event in events:
                     if latest_known_event is None or event.event_time > latest_known_event.event_time:
+                        event.shipment_id = shipment_id
                         self.db.write_event(event)
 
                         logging.info(f"New event for {tracking_number}: {event.event_description} - {event.event_time}")

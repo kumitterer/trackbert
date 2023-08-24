@@ -24,7 +24,7 @@ class KeyDelivery(BaseTracker):
 
         for event in events:
             yield Event(
-                shipment_id = tracking_number,
+                shipment_id = 0,
                 event_time = event["time"],
                 event_description = event["context"],
                 raw_event = json.dumps(event)

@@ -31,9 +31,15 @@ Then copy `config.dist.ini` to `config.ini` and fill in your KeyDelivery API det
 
 ## Usage
 
-To add a new shipment, run `python trackbert.py --tracking-number <tracking-number> --carrier <carrier-id>`. Find the required carrier ID in the [KeyDelivery API management](https://app.kd100.com/api-management).
+First, assure that the virtual environment is activated:
 
-To run the main loop, run `python trackbert.py`. This will check the status of all shipments every 5 minutes, and print the status to the console. If the status of a shipment changes, you will get a desktop notification.
+```bash
+source venv/bin/activate
+```
+
+To add a new shipment, run `trackbert --tracking-number <tracking-number> --carrier <carrier-id>`. Find the required carrier ID in the [KeyDelivery API management](https://app.kd100.com/api-management).
+
+To run the main loop, run `trackbert`. This will check the status of all shipments every 5 minutes, and print the status to the console. If the status of a shipment changes, you will get a desktop notification.
 
 ## License
 

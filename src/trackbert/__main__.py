@@ -8,11 +8,10 @@ import logging
 import asyncio
 from typing import Tuple, Never, Optional
 
-from classes.database import Database
-from classes.tracker import Tracker
+from .classes.database import Database
+from .classes.tracker import Tracker
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--tracking-number", "-n", type=str, required=False)
     parser.add_argument("--carrier", "-c", type=str, required=False)
@@ -76,3 +75,6 @@ if __name__ == "__main__":
 
     tracker = Tracker()
     asyncio.run(tracker.start_async())
+
+if __name__ == "__main__":
+    main()

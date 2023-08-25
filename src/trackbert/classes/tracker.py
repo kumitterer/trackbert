@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Never
 
 from .database import Database
-from trackers.base import BaseTracker
+from ..trackers.base import BaseTracker
 
 from pykeydelivery import KeyDelivery
 
@@ -36,14 +36,14 @@ class Tracker:
 
             logging.debug(f"Found API {api.stem}")
 
-            module = importlib.import_module(f"trackers.{api.stem}")
+            module = importlib.import_module(f"trackbert.trackers.{api.stem}")
 
             if "tracker" in module.__dict__:
                 tracker = module.tracker
                 logging.debug(f"Found tracker {api.stem}")
                 try:
-                    carriers = tracker.supported_carriers()
                     api = tracker()
+                    carriers = api.supported_carriers()
 
                     for carrier, priority in carriers:
                         self.apis.append((carrier, priority, api))

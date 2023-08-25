@@ -5,8 +5,7 @@ class BaseTracker:
     def get_status(self, tracking_number, carrier):
         raise NotImplementedError()
 
-    @staticmethod
-    def supported_carriers():
+    def supported_carriers(self):
         """Defines the carriers supported by this tracker.
 
         Returns:

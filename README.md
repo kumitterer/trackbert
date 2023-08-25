@@ -1,10 +1,15 @@
 # Trackbert
 
-A simple Python script for tracking shipments through [KeyDelivery](https://kd100.com).
+A simple Python script for tracking shipments, primarily through [KeyDelivery](https://kd100.com).
 
 If your system provides `notify-send`, you will get a desktop notification when the status of your shipment changes.
 
 Status information is stored in a SQLite database.
+
+## Currently supported tracking providers
+
+- [KeyDelivery](https://kd100.com) (paid, provides tracking for most carriers)
+- [Austrian Post](https://www.post.at)
 
 ## Requirements
 
@@ -19,7 +24,7 @@ git clone https://kumig.it/kumitterer/trackbert.git
 cd trackbert
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install .
 ```
 
 Then copy `config.dist.ini` to `config.ini` and fill in your KeyDelivery API details, which you can find in your [KeyDelivery API management](https://app.kd100.com/api-management). You can find your API key in your KeyDelivery account settings.

@@ -1,5 +1,5 @@
 from .base import BaseTracker
-from classes.database import Event
+from ..classes.database import Event
 
 import json
 
@@ -28,8 +28,7 @@ class PostAT(BaseTracker):
                 raw_event=json.dumps(event),
             )
 
-    @staticmethod
-    def supported_carriers():
+    def supported_carriers(self):
         return [
             ("austrian_post", 100),
         ]

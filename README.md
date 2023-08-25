@@ -10,6 +10,9 @@ Status information is stored in a SQLite database.
 
 - [KeyDelivery](https://kd100.com) (paid, provides tracking for most carriers)
 - [Austrian Post](https://www.post.at)
+- [GLS](https://gls-group.eu)
+
+More tracking providers can be added easily by subclassing `trackbert.trackers.base.BaseTracker`. This should be relatively self-explanatory if you look at the existing implementations. Pull requests are welcome!
 
 ## Requirements
 
@@ -19,15 +22,17 @@ In order to get desktop notifications, you need to have `notify-send` installed.
 
 ## Installation
 
+First, create a virtual environment and install the package:
+
 ```bash
-git clone https://kumig.it/kumitterer/trackbert.git
-cd trackbert
 python -m venv venv
 source venv/bin/activate
-pip install .
+pip install trackbert
 ```
 
-Then copy `config.dist.ini` to `config.ini` and fill in your KeyDelivery API details, which you can find in your [KeyDelivery API management](https://app.kd100.com/api-management). You can find your API key in your KeyDelivery account settings.
+Then create a `config.ini` in your working directory (see [config.dist.ini](config.dist.ini)) and fill in your KeyDelivery API details, which you can find in your [KeyDelivery API management](https://app.kd100.com/api-management). You can find your API key in your KeyDelivery account settings.
+
+You can also omit this step, but then you will only be able to track shipments from Austrian Post and GLS.
 
 ## Usage
 

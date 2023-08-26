@@ -19,7 +19,8 @@ class KeyDelivery(BaseTracker):
                 f"Got events for {tracking_number}: {len(all_events['data']['items'])}"
             )
         except KeyError:
-            print(f"Error getting events for {tracking_number}: {all_events}")
+            logging.error(
+                f"Error getting events for {tracking_number}: {all_events}")
             return
 
         events = sorted(

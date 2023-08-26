@@ -121,6 +121,10 @@ class Tracker:
 
         events = sorted(events, key=lambda x: x.event_time, reverse=True)
 
+        if not events:
+            logging.debug(f"No events found for {shipment.tracking_number}")
+            return
+
         if latest_known_event:
             logging.debug(
                 f"Latest known event for {shipment.tracking_number}: {latest_known_event.event_description} - {latest_known_event.event_time}"

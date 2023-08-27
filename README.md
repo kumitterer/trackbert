@@ -11,6 +11,7 @@ Status information is stored in a SQLite database.
 - [KeyDelivery](https://kd100.com) (paid, provides tracking for most carriers)
 - [Austrian Post](https://www.post.at)
 - [GLS](https://gls-group.eu)
+- [FedEx](https://www.fedex.com) (requires an API key, see [FedEx Developer Resource Center](https://www.fedex.com/en-us/developer.html))
 
 More tracking providers can be added easily by subclassing `trackbert.trackers.base.BaseTracker`. This should be relatively self-explanatory if you look at the existing implementations. Pull requests are welcome!
 

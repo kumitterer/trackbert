@@ -9,8 +9,6 @@ from typing import Optional, Tuple, Never
 from .database import Database
 from ..trackers.base import BaseTracker
 
-from pykeydelivery import KeyDelivery
-
 
 class Tracker:
     loop_interval = 60

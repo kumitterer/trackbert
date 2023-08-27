@@ -21,6 +21,7 @@ dependencies = [
     "pykeydelivery",
     "postat",
     "glsapi",
+    "fedextrack",
     "sqlalchemy",
     "python-dateutil",
 ]

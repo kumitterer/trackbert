@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "trackbert"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   { name="Kumi Mitterer", email="trackbert@kumi.email" },
 ]
@@ -22,6 +22,7 @@ dependencies = [
     "postat",
     "glsapi",
     "fedextrack",
+    "dhltrack",
     "sqlalchemy",
     "alembic",
     "python-dateutil",

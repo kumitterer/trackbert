@@ -3,8 +3,11 @@ import subprocess
 import time
 import importlib
 import asyncio
+
 from pathlib import Path
 from typing import Optional, Tuple, Never
+from os import PathLike
+from configparser import ConfigParser
 
 from .database import Database
 from ..trackers.base import BaseTracker
@@ -46,7 +49,7 @@ class Tracker:
                     for carrier, priority in carriers:
                         self.apis.append((carrier, priority, api))
                 except:
-                    logging.exception(f"Error loading tracker {name}")
+                    logging.exception(f"Error loading tracker {api.stem}")
 
     def query_api(self, tracking_number: str, carrier: str) -> list:
         logging.debug(f"Querying API for {tracking_number} with carrier {carrier}")
@@ -173,12 +176,20 @@ class Tracker:
 
             await asyncio.sleep(self.loop_interval)
 
-    def start(self):
-        self.db = Database("sqlite:///trackbert.db")
+    def _pre_start(self, config: Optional[PathLike] = None):
+        parser = ConfigParser()
+        parser.read(config or [])
+
+        self.database_uri = parser.get("Trackbert", "database", fallback="sqlite:///trackbert.db")
+        self.db = Database(self.database_uri)
+
+        self.loop_interval = parser.getint("Trackbert", "interval", fallback=60)
         self.notify("Trackbert", "Starting up")
+
+    def start(self, config: Optional[PathLike] = None):
+        self._pre_start(config)
         self.start_loop()
 
-    async def start_async(self):
-        self.db = Database("sqlite:///trackbert.db")
-        self.notify("Trackbert", "Starting up")
+    async def start_async(self, config: Optional[PathLike] = None):
+        self._pre_start(config)
         await self.start_loop_async()

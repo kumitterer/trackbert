@@ -12,6 +12,7 @@ Status information is stored in a SQLite database.
 - [Austrian Post](https://www.post.at)
 - [GLS](https://gls-group.eu)
 - [FedEx](https://www.fedex.com) (requires an API key, see [FedEx Developer Resource Center](https://www.fedex.com/en-us/developer.html))
+- [DHL](https://www.dhl.com) (requires an API key, see [DHL Developer Portal](https://developer.dhl.com/))
 
 More tracking providers can be added easily by subclassing `trackbert.trackers.base.BaseTracker`. This should be relatively self-explanatory if you look at the existing implementations. Pull requests are welcome!
 
@@ -42,6 +43,10 @@ First, assure that the virtual environment is activated:
 ```bash
 source venv/bin/activate
 ```
+
+If you need to create a new config file, run `trackbert -g`. You need this if
+you want to provide API keys required for KeyDelivery or some of the other
+tracking providers.
 
 To add a new shipment, run `trackbert --tracking-number <tracking-number> --carrier <carrier-id>`. Find the required carrier ID in the [KeyDelivery API management](https://app.kd100.com/api-management).
 

@@ -6,13 +6,18 @@ import subprocess
 import argparse
 import logging
 import asyncio
+
 from typing import Tuple, Never, Optional
 
 from .classes.database import Database
 from .classes.tracker import Tracker
 
+
 def main():
     parser = argparse.ArgumentParser()
+
+    # Arguments related to the tracker
+
     parser.add_argument("--tracking-number", "-n", type=str, required=False)
     parser.add_argument("--carrier", "-c", type=str, required=False)
     parser.add_argument("--description", "-d", type=str, required=False)
@@ -30,16 +35,36 @@ def main():
         required=False,
         help="Disable existing shipment",
     )
-    parser.add_argument(
-        "--timeout",
-        "-t",
-        type=int,
-        required=False,
-        default=30,
-        help="Notification timeout in seconds",
-    )
+
+    # Arguments related to the config file
+
+    parser.add_argument("--generate-config", action="store_true", required=False)
+    parser.add_argument("--config-file", "-C", type=str, required=False)
 
     args = parser.parse_args()
+
+    # Generate config file if requested
+
+    config_file = Path(args.config_file or "config.ini")
+
+    if args.generate_config:
+        if config_file.exists():
+            print(f"Config file {config_file} already exists.")
+            exit(1)
+
+        with Path(config_file).open("w") as config_file_obj:
+            template = Path(__file__).parent / "config.dist.ini"
+            config_file_obj.write(template.read_text())
+            print(f"Generated config file {config_file}")
+            exit(0)
+
+    # Load config file
+
+    if not config_file.exists():
+        print(f"Config file {config_file} does not exist. Use -g to generate it.")
+        exit(1)
+
+    
 
     db = Database("sqlite:///trackbert.db")
 
@@ -75,6 +100,7 @@ def main():
 
     tracker = Tracker()
     asyncio.run(tracker.start_async())
+
 
 if __name__ == "__main__":
     main()

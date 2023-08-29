@@ -3,7 +3,13 @@ from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
+from alembic.config import Config
+from alembic import command
+
 import json
+import time
+
+from pathlib import Path
 
 Base = declarative_base()
 
@@ -34,6 +40,8 @@ class Database:
         self.engine = create_engine(database_uri)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
+
+        self.run_migrations()
 
     def create_shipment(self, tracking_number, carrier, description=""):
         new_shipment = Shipment(
@@ -102,5 +110,16 @@ class Database:
         )
         return event
 
-    def initialize_db(self):
-        Base.metadata.create_all(self.engine)
+    def make_migration(self, message):
+        alembic_cfg = Config(Path(__file__).parent.parent / "alembic.ini")
+        alembic_cfg.set_main_option("sqlalchemy.url", self.engine.url.__to_string__(hide_password=False))
+        migrations_dir = Path(__file__).parent.parent / 'migrations'
+        alembic_cfg.set_main_option("script_location", str(migrations_dir))
+        command.revision(alembic_cfg, message=message, autogenerate=True)
+
+    def run_migrations(self):
+        alembic_cfg = Config(Path(__file__).parent.parent / "alembic.ini")
+        alembic_cfg.set_main_option("sqlalchemy.url", self.engine.url.__to_string__(hide_password=False))
+        migrations_dir = Path(__file__).parent.parent / 'migrations'
+        alembic_cfg.set_main_option("script_location", str(migrations_dir))
+        command.upgrade(alembic_cfg, "head")

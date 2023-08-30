@@ -144,7 +144,7 @@ class Tracker:
             logging.debug(f"No known events for {shipment.tracking_number}")
 
         logging.debug(
-            f"Latest upstream event for {shipment.tracking_number}: {events[0].event_description} - {events[0].event_time}"
+            f"Latest upstream event for {shipment.tracking_number}: {events[-1].event_description} - {events[-1].event_time}"
         )
 
         for event in events:

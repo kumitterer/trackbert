@@ -13,6 +13,7 @@ Status information is stored in a SQLite database.
 - [GLS](https://gls-group.eu)
 - [FedEx](https://www.fedex.com) (requires an API key, see [FedEx Developer Resource Center](https://www.fedex.com/en-us/developer.html))
 - [DHL](https://www.dhl.com) (requires an API key, see [DHL Developer Portal](https://developer.dhl.com/))
+- [DPD (Austria)](https://www.mydpd.at) (may work for other countries as well, but untested)
 
 More tracking providers can be added easily by subclassing `trackbert.trackers.base.BaseTracker`. This should be relatively self-explanatory if you look at the existing implementations. Pull requests are welcome!
 

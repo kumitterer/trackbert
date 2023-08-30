@@ -113,7 +113,7 @@ class Tracker:
 
     def process_shipment(self, shipment) -> None:
         if not shipment.carrier:
-            logging.warning(
+            logging.info(
                 f"Shipment {shipment.tracking_number} has no carrier, skipping"
             )
             return

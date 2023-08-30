@@ -130,7 +130,7 @@ class Tracker:
             logging.exception(f"Error querying API for {shipment.tracking_number}")
             return
 
-        events = sorted(events, key=lambda x: x.event_time, reverse=True)
+        events = sorted(events, key=lambda x: x.event_time)
 
         if not events:
             logging.debug(f"No events found for {shipment.tracking_number}")
@@ -154,7 +154,7 @@ class Tracker:
             ):
                 event.shipment_id = shipment.id
                 self.db.write_event(event)
-                self.notify_event(shipment, event, event == events[0])
+                self.notify_event(shipment, event, event == events[-1])
 
     def start_loop(self) -> Never:
         logging.debug("Starting loop")

@@ -10,7 +10,7 @@ import logging
 
 class FedEx(BaseTracker):
     def __init__(self, *args, **kwargs):
-        self.api = FedExAPI.from_config("config.ini")
+        self.api = FedExAPI.from_config(str(kwargs.get("config")))
 
     def get_status(self, tracking_number, carrier):
         response = self.api.track_by_tracking_number(tracking_number)
@@ -47,7 +47,7 @@ class FedEx(BaseTracker):
 
     def supported_carriers(self):
         return [
-            ("fedex", 100),
+            ("fedex", 100, "FedEx"),
         ]
 
 

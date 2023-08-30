@@ -30,7 +30,7 @@ class PostAT(BaseTracker):
 
     def supported_carriers(self):
         return [
-            ("austrian_post", 100),
+            ("austrian_post", 100, "Austrian Post"),
         ]
 
 

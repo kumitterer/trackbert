@@ -1,5 +1,6 @@
 from .base import BaseTracker
 from ..classes.database import Event
+from ..classes.http import HTTPRequest
 
 from pykeydelivery import KeyDelivery as KeyDeliveryAPI
 
@@ -9,7 +10,7 @@ import logging
 
 class KeyDelivery(BaseTracker):
     def __init__(self, *args, **kwargs):
-        self.api = KeyDeliveryAPI.from_config("config.ini")
+        self.api = KeyDeliveryAPI.from_config(str(kwargs.get("config")))
 
     def get_status(self, tracking_number, carrier):
         all_events = self.api.realtime(carrier, tracking_number)
@@ -36,9 +37,18 @@ class KeyDelivery(BaseTracker):
             )
 
     def supported_carriers(self):
-        return [
-            ("*", 1),
-        ]
+        try:
+            request = HTTPRequest("https://app.kd100.com/console/utils/kdbm")
+            response = request.execute()
+            carriers = [
+                (carrier["code"], 1, carrier["name"])
+                for carrier in response["data"]
+            ]
+            return carriers
+        except:
+            return [
+                ("*", 1),
+            ]
 
 
 tracker = KeyDelivery

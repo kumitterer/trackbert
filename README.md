@@ -50,7 +50,15 @@ tracking providers.
 
 To add a new shipment, run `trackbert --tracking-number <tracking-number> --carrier <carrier-id>`. Find the required carrier ID in the [KeyDelivery API management](https://app.kd100.com/api-management).
 
-To run the main loop, run `trackbert`. This will check the status of all shipments every 5 minutes, and print the status to the console. If the status of a shipment changes, you will get a desktop notification.
+To run the main loop, run `trackbert`. This will check the status of all shipments every minute, and print the status to the console. If the status of a shipment changes, you will get a desktop notification.
+
+## Caveats
+
+### DHL
+
+By default, the script queries for updates for each active shipment once per minute. However, if you have the DHL API enabled, you will quickly run into the rate limit. Therefore, the script will only query for updates once per hour (`if minute == 0`). For the default 250 requests per day limit, this means that you can only track up to 10 shipments simultaneously.
+
+You may request a higher rate limit from DHL. See the [DHL Developer Portal](https://developer.dhl.com/) for details. If you do this, you can set `ratelimited = 0` (note that 0/1 is a boolean value in the config file) in your `config.ini` to disable the rate limit.
 
 ## License
 

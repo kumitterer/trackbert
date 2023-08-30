@@ -27,7 +27,7 @@ class GLS(BaseTracker):
 
     def supported_carriers(self):
         return [
-            ("gls", 100),
+            ("gls", 100, "GLS"),
         ]
 
 

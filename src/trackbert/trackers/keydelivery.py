@@ -38,8 +38,7 @@ class KeyDelivery(BaseTracker):
 
     def supported_carriers(self):
         try:
-            request = HTTPRequest("https://app.kd100.com/console/utils/kdbm")
-            response = request.execute()
+            response = self.api.list_carriers()
             carriers = [
                 (carrier["code"], 1, carrier["name"])
                 for carrier in response["data"]

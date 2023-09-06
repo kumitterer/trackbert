@@ -3,6 +3,7 @@ import subprocess
 import time
 import importlib
 import asyncio
+import sqlalchemy.exc
 
 from pathlib import Path
 from typing import Optional, Tuple, Never
@@ -160,10 +161,21 @@ class Tracker:
         logging.debug("Starting loop")
 
         while True:
-            for shipment in self.db.get_shipments():
-                self.process_shipment(shipment)
+            try:
+                for shipment in self.db.get_shipments():
+                    self.process_shipment(shipment)
 
-            time.sleep(self.loop_interval)
+                time.sleep(self.loop_interval)
+
+            except sqlalchemy.exc.TimeoutError:
+                logging.warning("Database timeout while processing shipments")
+
+            except KeyboardInterrupt:
+                logging.info("Keyboard interrupt, exiting")
+                sys.exit(0)
+
+            except Exception as e:
+                logging.exception(f"Unknown error in loop: {e}")
 
     async def start_loop_async(self) -> Never:
         logging.debug("Starting loop")
@@ -181,8 +193,19 @@ class Tracker:
 
             try:
                 await asyncio.gather(*tasks)
+
             except asyncio.TimeoutError:
                 logging.warning("Timeout while processing shipments")
+
+            except sqlalchemy.exc.TimeoutError:
+                logging.warning("Database timeout while processing shipments")
+
+            except KeyboardInterrupt:
+                logging.info("Keyboard interrupt, exiting")
+                sys.exit(0)
+
+            except Exception as e:
+                logging.exception(f"Unknown error in loop: {e}")
 
             await asyncio.sleep(self.loop_interval)
 

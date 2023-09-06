@@ -11,7 +11,7 @@ import asyncio
 from typing import Tuple, Never, Optional
 
 from .classes.database import Database
-from .classes.tracker import Tracker
+from .classes.core import Core
 
 
 def main():
@@ -102,7 +102,7 @@ def main():
         print(f"Config file {config_file} does not exist. Use -g to generate it.")
         exit(1)
 
-    tracker = Tracker(config_file)
+    tracker = Core(config_file)
 
     # List carriers if requested
 

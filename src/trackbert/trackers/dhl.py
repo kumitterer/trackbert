@@ -1,4 +1,4 @@
-from .base import BaseTracker
+from ..classes.tracker import BaseTracker
 from ..classes.database import Event
 
 from dhltrack import DHL as DHLAPI

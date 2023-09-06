@@ -70,8 +70,12 @@ class Core:
 
         return notifiers
 
+    def find_external_notifiers(self):
+        # TODO: Implement external notifiers using entry points
+        return []
+
     def find_notifiers(self):
-        return self.find_core_notifiers()
+        return self.find_core_notifiers() + self.find_external_notifiers()
 
     def find_core_providers(self):
         logging.debug("Finding core tracking providers")
@@ -113,8 +117,12 @@ class Core:
 
         return providers
 
+    def find_external_providers(self):
+        # TODO: Implement external providers using entry points
+        return []
+
     def find_providers(self):
-        return self.find_core_providers()
+        return self.find_core_providers() + self.find_external_providers()
 
     def query_provider(self, tracking_number: str, carrier: str) -> list:
         logging.debug(f"Querying provider for {tracking_number} with carrier {carrier}")

@@ -4,6 +4,7 @@ import subprocess
 import logging
 
 from typing import Optional
+from pathlib import Path
 
 class NotifySend(BaseNotifier):
     def __init__(self, *args, **kwargs):

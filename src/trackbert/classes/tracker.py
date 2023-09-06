@@ -172,7 +172,7 @@ class Tracker:
 
             except KeyboardInterrupt:
                 logging.info("Keyboard interrupt, exiting")
-                sys.exit(0)
+                exit(0)
 
             except Exception as e:
                 logging.exception(f"Unknown error in loop: {e}")
@@ -200,9 +200,9 @@ class Tracker:
             except sqlalchemy.exc.TimeoutError:
                 logging.warning("Database timeout while processing shipments")
 
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, asyncio.CancelledError):
                 logging.info("Keyboard interrupt, exiting")
-                sys.exit(0)
+                exit(0)
 
             except Exception as e:
                 logging.exception(f"Unknown error in loop: {e}")

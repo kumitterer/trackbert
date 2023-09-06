@@ -169,6 +169,7 @@ class Tracker:
 
             except sqlalchemy.exc.TimeoutError:
                 logging.warning("Database timeout while processing shipments")
+                self.db.engine.dispose()
 
             except KeyboardInterrupt:
                 logging.info("Keyboard interrupt, exiting")

@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, event
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -8,6 +7,7 @@ from alembic import command
 
 import json
 import time
+import logging
 
 from functools import wraps
 from pathlib import Path
@@ -37,6 +37,7 @@ class Shipment(Base):
     tracking_number = Column(String)
     carrier = Column(String)
     description = Column(String)
+    disabled = Column(Boolean, default=False)
 
     events = relationship("Event")
 
@@ -53,8 +54,12 @@ class Event(Base):
 
 class Database:
     def __init__(self, database_uri):
-        self.engine = create_engine(database_uri)
+        self.engine = create_engine(database_uri, pool_size=20, max_overflow=20)
         self.session = scoped_session(sessionmaker(bind=self.engine))
+
+        event.listen(self.engine, "connect", lambda _, __: logging.debug("DB connected"))
+        event.listen(self.engine, "close", lambda _, __: logging.debug("DB connection closed"))
+
         self.run_migrations()
 
     @with_session
@@ -94,8 +99,12 @@ class Database:
         return shipment
 
     @with_session
-    def get_shipments(self, session):
+    def get_shipments(self, session, ignore_disabled=True):
         shipments = session.query(Shipment).all()
+
+        if ignore_disabled:
+            shipments = [s for s in shipments if not s.disabled]
+
         return shipments
 
     def create_event(self, shipment_id, event_time, event_description, raw_event):

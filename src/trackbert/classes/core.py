@@ -44,8 +44,8 @@ class Core:
 
             try:
                 module = importlib.import_module(f"trackbert.notifiers.{notifier.stem}")
-            except:
-                logging.error(f"Error loading class {notifier.stem}")
+            except Exception as e:
+                logging.error(f"Error loading class {notifier.stem}: {e}")
                 continue
 
             if "notifier" in module.__dict__:

@@ -1,4 +1,4 @@
-from ..classes.tracker import BaseTracker
+from ..classes.provider import BaseProvider
 from ..classes.database import Event
 
 import json
@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from postat.classes.api import PostAPI
 
 
-class PostAT(BaseTracker):
+class PostAT(BaseProvider):
     def __init__(self, *args, **kwargs):
         pass
 
@@ -34,4 +34,4 @@ class PostAT(BaseTracker):
         ]
 
 
-tracker = PostAT
+provider = PostAT

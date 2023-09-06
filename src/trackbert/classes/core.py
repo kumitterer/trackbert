@@ -11,12 +11,14 @@ from os import PathLike
 from configparser import ConfigParser
 
 from .database import Database
-from .tracker import BaseTracker
+from .provider import BaseProvider
 
 
 class Core:
-    loop_interval = 60
-    loop_timeout = 30
+    loop_interval: int = 60
+    loop_timeout: int = 30
+
+    config: Optional[ConfigParser] = None
 
     def __init__(self, config: Optional[PathLike] = None):
         logging.basicConfig(
@@ -26,81 +28,112 @@ class Core:
         )
 
         self._pre_start(config)
+        self.notifiers = self.find_notifiers()
+        self.providers = self.find_providers()
 
-        self.find_apis()
+    def find_core_notifiers(self):
+        logging.debug("Finding core notifiers")
 
-    def find_apis(self):
-        logging.debug("Finding APIs")
+        notifiers = []
 
-        self.apis = []
-
-        for api in Path(__file__).parent.parent.glob("trackers/*.py"):
-            if api.name in ("__init__.py", "base.py"):
+        for notifier in Path(__file__).parent.parent.glob("notifiers/*.py"):
+            if notifier.name in ("__init__.py", "base.py"):
                 continue
 
-            logging.debug(f"Found API {api.stem}")
+            logging.debug(f"Considering notifier {notifier.stem}")
 
             try:
-                module = importlib.import_module(f"trackbert.trackers.{api.stem}")
+                module = importlib.import_module(f"trackbert.notifiers.{notifier.stem}")
             except:
-                logging.error(f"Error loading class {api.stem}")
+                logging.error(f"Error loading class {notifier.stem}")
+                continue
 
-            if "tracker" in module.__dict__:
-                tracker = module.tracker
-                logging.debug(f"Found tracker {api.stem}")
+            if "notifier" in module.__dict__:
+                notifier_class = module.notifier
+                logging.debug(f"Found notifier {notifier_class.__name__}")
+
                 try:
-                    api = tracker(config=self.config_path)
-                    carriers = api.supported_carriers()
+                    if self.config and notifier_class.__name__ in self.config:
+                        nconfig = self.config[notifier_class.__name__]
+                    else:
+                        nconfig = None
+
+                    nobj = notifier_class(config=nconfig)
+
+                    if nobj.enabled:
+                        notifiers.append(nobj)
+
+                except Exception as e:
+                    logging.error(
+                        f"Error loading notifier {notifier_class.__name__}: {e}"
+                    )
+
+        return notifiers
+
+    def find_notifiers(self):
+        return self.find_core_notifiers()
+
+    def find_core_providers(self):
+        logging.debug("Finding core tracking providers")
+
+        providers = []
+
+        for provider in Path(__file__).parent.parent.glob("providers/*.py"):
+            if provider.name in ("__init__.py", "base.py"):
+                continue
+
+            logging.debug(f"Considering provider {provider.stem}")
+
+            try:
+                module = importlib.import_module(f"trackbert.providers.{provider.stem}")
+            except Exception as e:
+                logging.error(f"Error loading class {provider.stem}: {e}")
+                continue
+
+            if "provider" in module.__dict__:
+                provider_api = module.provider
+                logging.debug(f"Found provider {provider_api.__name__}")
+                try:
+                    pobj = provider_api(config=self.config_path)
+                    carriers = pobj.supported_carriers()
 
                     for carrier in carriers:
-                        self.apis.append((carrier[0], carrier[1], api, (carrier[2] if len(carrier) > 2 else None)))
+                        providers.append(
+                            (
+                                carrier[0],
+                                carrier[1],
+                                pobj,
+                                (carrier[2] if len(carrier) > 2 else None),
+                            )
+                        )
                 except Exception as e:
-                    logging.error(f"Error loading tracker {api.__class__.__name__}: {e}")
+                    logging.error(
+                        f"Error loading provider {provider.__class__.__name__}: {e}"
+                    )
 
-    def query_api(self, tracking_number: str, carrier: str) -> list:
-        logging.debug(f"Querying API for {tracking_number} with carrier {carrier}")
+        return providers
 
-        for api_entry in sorted(self.apis, key=lambda x: x[1], reverse=True):
+    def find_providers(self):
+        return self.find_core_providers()
+
+    def query_provider(self, tracking_number: str, carrier: str) -> list:
+        logging.debug(f"Querying provider for {tracking_number} with carrier {carrier}")
+
+        for api_entry in sorted(self.providers, key=lambda x: x[1], reverse=True):
             api_carrier = api_entry[0]
             priority = api_entry[1]
-            api = api_entry[2]
+            provider = api_entry[2]
             name = api_entry[3] if len(api_entry) > 3 else None
 
             if api_carrier == "*" or api_carrier == carrier:
                 logging.debug(
-                    f"Using API {api.__class__.__name__} for {tracking_number} with carrier {carrier}"
+                    f"Using provider {provider.__class__.__name__} for {tracking_number} with carrier {carrier}"
                 )
-                return list(api.get_status(tracking_number, carrier))
+                return list(provider.get_status(tracking_number, carrier))
 
-    def notify(
-        self,
-        title: str,
-        message: str,
-        urgency: str = "normal",
-        timeout: Optional[int] = 5000,
-    ) -> None:
-        logging.debug(f"Sending notification: {title} - {message}")
-
-        command = [
-            "notify-send",
-            "-a",
-            "trackbert",
-            "-u",
-            urgency,
-            "-i",
-            str(Path(__file__).parent.parent / "assets" / "parcel-delivery-icon.webp"),
-        ]
-
-        if timeout:
-            command += ["-t", str(timeout)]
-
-        command = command + [title, message]
-
-        try:
-            subprocess.run(command)
-
-        except FileNotFoundError:
-            logging.warning("notify-send not found, not sending notification")
+    def notify(self, title, message, urgent=False) -> None:
+        for notifier in self.notifiers:
+            notifier.notify(title, message, urgent)
 
     def notify_event(self, shipment, event, critical=False) -> None:
         logging.info(
@@ -126,9 +159,11 @@ class Core:
         latest_known_event = self.db.get_latest_event(shipment.id)
 
         try:
-            events = self.query_api(shipment.tracking_number, shipment.carrier)
+            events = self.query_provider(shipment.tracking_number, shipment.carrier)
         except Exception as e:
-            logging.exception(f"Error querying API for {shipment.tracking_number}")
+            logging.exception(
+                f"Error querying provider for {shipment.tracking_number}: {e}"
+            )
             return
 
         events = sorted(events, key=lambda x: x.event_time)
@@ -213,21 +248,21 @@ class Core:
     def _pre_start(self, config: Optional[PathLike] = None):
         self.config_path = config
 
-        parser = ConfigParser()
-        parser.read(config or [])
+        self.config = ConfigParser()
+        self.config.read(config or [])
 
-        self.debug = parser.getboolean("Trackbert", "debug", fallback=False)
+        self.debug = self.config.getboolean("Trackbert", "debug", fallback=False)
 
         if self.debug:
             logger = logging.getLogger()
             logger.setLevel(logging.DEBUG)
 
-        self.database_uri = parser.get(
+        self.database_uri = self.config.get(
             "Trackbert", "database", fallback="sqlite:///trackbert.db"
         )
         self.db = Database(self.database_uri)
 
-        self.loop_interval = parser.getint("Trackbert", "interval", fallback=60)
+        self.loop_interval = self.config.getint("Trackbert", "interval", fallback=60)
 
     def start(self, config: Optional[PathLike] = None):
         self.notify("Trackbert", "Starting up")

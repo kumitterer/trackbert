@@ -2,7 +2,7 @@ from typing import Optional, Tuple, List, Generator
 
 from ..classes.database import Event
 
-class BaseTracker:
+class BaseProvider:
     def __init__(self, *args, **kwargs):
         pass
 

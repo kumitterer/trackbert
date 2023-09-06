@@ -1,4 +1,4 @@
-from ..classes.tracker import BaseTracker
+from ..classes.provider import BaseProvider
 from ..classes.database import Event
 
 import json
@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from glsapi.classes.api import GLSAPI
 
 
-class GLS(BaseTracker):
+class GLS(BaseProvider):
     def __init__(self, *args, **kwargs):
         pass
 
@@ -31,4 +31,4 @@ class GLS(BaseTracker):
         ]
 
 
-tracker = GLS
+provider = GLS

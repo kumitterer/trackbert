@@ -1,4 +1,4 @@
-from ..classes.tracker import BaseTracker
+from ..classes.provider import BaseProvider
 from ..classes.database import Event
 
 import json
@@ -8,7 +8,7 @@ from datetime import datetime
 from dpdtrack.classes.api import DPD as DPDAPI
 
 
-class DPD(BaseTracker):
+class DPD(BaseProvider):
     def __init__(self, *args, **kwargs):
         pass
 
@@ -40,4 +40,4 @@ class DPD(BaseTracker):
         ]
 
 
-tracker = DPD
+provider = DPD

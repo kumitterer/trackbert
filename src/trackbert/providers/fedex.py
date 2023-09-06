@@ -1,4 +1,4 @@
-from ..classes.tracker import BaseTracker
+from ..classes.provider import BaseProvider
 from ..classes.database import Event
 
 from fedextrack import FedEx as FedExAPI
@@ -8,7 +8,7 @@ import json
 import logging
 
 
-class FedEx(BaseTracker):
+class FedEx(BaseProvider):
     def __init__(self, *args, **kwargs):
         self.api = FedExAPI.from_config(str(kwargs.get("config")))
 
@@ -51,4 +51,4 @@ class FedEx(BaseTracker):
         ]
 
 
-tracker = FedEx
+provider = FedEx

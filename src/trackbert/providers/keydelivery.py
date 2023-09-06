@@ -1,4 +1,4 @@
-from ..classes.tracker import BaseTracker
+from ..classes.provider import BaseProvider
 from ..classes.database import Event
 from ..classes.http import HTTPRequest
 
@@ -8,7 +8,7 @@ import json
 import logging
 
 
-class KeyDelivery(BaseTracker):
+class KeyDelivery(BaseProvider):
     def __init__(self, *args, **kwargs):
         self.api = KeyDeliveryAPI.from_config(str(kwargs.get("config")))
 
@@ -50,4 +50,4 @@ class KeyDelivery(BaseTracker):
             ]
 
 
-tracker = KeyDelivery
+provider = KeyDelivery

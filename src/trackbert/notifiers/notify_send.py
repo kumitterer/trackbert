@@ -3,6 +3,8 @@ from ..classes.notifier import BaseNotifier
 import subprocess
 import logging
 
+from typing import Optional
+
 class NotifySend(BaseNotifier):
     def __init__(self, *args, **kwargs):
         pass

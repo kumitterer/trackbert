@@ -141,7 +141,7 @@ def main():
                 f"Updated shipment for {args.tracking_number} with carrier {args.carrier}"
             )
 
-        if shipment is None and args.update:
+        if not shipment and args.update:
             print(f"Shipment {args.tracking_number} does not exist. Remove -u to create.")
             exit(1)
 

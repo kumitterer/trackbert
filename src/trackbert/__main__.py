@@ -112,11 +112,11 @@ def main():
         carriers = set(
             [
                 (api[0], (api[3] if len(api) > 3 else None))
-                for api in tracker.apis
+                for provider in tracker.providers
                 if not any(
                     [
-                        others[1] > api[1]
-                        for others in filter(lambda x: x[0] == api[0], tracker.apis)
+                        others[1] > provider[1]
+                        for others in filter(lambda x: x[0] == api[0], tracker.providers)
                     ]
                 )
             ]

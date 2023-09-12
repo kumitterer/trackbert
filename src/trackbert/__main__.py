@@ -127,7 +127,7 @@ def main():
 
     if args.tracking_number is not None and args.carrier is not None:
         if (
-            shipment := tracker.db.get_shipment(args.tracking_number)
+            (shipment := tracker.db.get_shipment(args.tracking_number))
             and not args.update
         ):
             print(f"Shipment {args.tracking_number} already exists. Use -u to update.")
@@ -140,6 +140,7 @@ def main():
             print(
                 f"Updated shipment for {args.tracking_number} with carrier {args.carrier}"
             )
+            exit(0)
 
         if not shipment and args.update:
             print(f"Shipment {args.tracking_number} does not exist. Remove -u to create.")

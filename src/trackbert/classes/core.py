@@ -143,14 +143,14 @@ class Core:
         for notifier in self.notifiers:
             notifier.notify(title, message, urgent)
 
-    def notify_event(self, shipment, event, critical=False) -> None:
+    def notify_event(self, shipment, event, urgent=False) -> None:
         logging.info(
             f"New event for {shipment.tracking_number}: {event.event_description} - {event.event_time}"
         )
         self.notify(
             f"New event for {shipment.description or shipment.tracking_number}",
             event.event_description + " - " + event.event_time,
-            urgency="critical" if critical else "normal",
+            urgent=urgent,
         )
 
     def process_shipment(self, shipment) -> None:

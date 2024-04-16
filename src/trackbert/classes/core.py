@@ -3,6 +3,8 @@ import subprocess
 import time
 import importlib
 import asyncio
+
+import setuptools.metadata
 import sqlalchemy.exc
 
 from pathlib import Path
@@ -71,8 +73,35 @@ class Core:
         return notifiers
 
     def find_external_notifiers(self):
-        # TODO: Implement external notifiers using entry points
-        return []
+        logging.debug("Finding external notifiers")
+        notifiers = []
+
+        for entry_point in importlib.metadata.entry_points().get("trackbert.notifiers", []):
+            logging.debug(f"Considering external notifier {entry_point.name}")
+
+            try:
+                notifier = entry_point.load()
+            except Exception as e:
+                logging.error(f"Error loading class {entry_point.name}: {e}")
+                continue
+
+            try:
+                if self.config and notifier_class.__name__ in self.config:
+                    nconfig = self.config[notifier_class.__name__]
+                else:
+                    nconfig = None
+
+                nobj = notifier_class(config=nconfig)
+
+                if nobj.enabled:
+                    notifiers.append(nobj)
+
+            except Exception as e:
+                logging.error(
+                    f"Error loading notifier {notifier_class.__name__}: {e}"
+                )
+
+        return notifiers
 
     def find_notifiers(self):
         return self.find_core_notifiers() + self.find_external_notifiers()
@@ -118,8 +147,38 @@ class Core:
         return providers
 
     def find_external_providers(self):
-        # TODO: Implement external providers using entry points
-        return []
+        logging.debug("Finding external tracking providers")
+
+        providers = []
+
+        for entry_point in importlib.metadata.entry_points().get("trackbert.providers", []):
+            logging.debug(f"Considering external provider {entry_point.name}")
+
+            try:
+                provider = entry_point.load()
+            except Exception as e:
+                logging.error(f"Error loading class {entry_point.name}: {e}")
+                continue
+
+            try:
+                pobj = provider(config=self.config_path)
+                carriers = pobj.supported_carriers()
+
+                for carrier in carriers:
+                    providers.append(
+                        (
+                            carrier[0],
+                            carrier[1],
+                            pobj,
+                            (carrier[2] if len(carrier) > 2 else None),
+                        )
+                    )
+            except Exception as e:
+                logging.error(
+                    f"Error loading provider {provider.__class__.__name__}: {e}"
+                )
+
+        return providers
 
     def find_providers(self):
         return self.find_core_providers() + self.find_external_providers()

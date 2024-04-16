@@ -31,8 +31,9 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://kumig.it/kumitterer/trackbert"
-"Bug Tracker" = "https://kumig.it/kumitterer/trackbert/issues"
+"Homepage" = "https://git.private.coffee/kumi/trackbert"
+"Bug Tracker" = "https://git.private.coffee/kumi/trackbert/issues"
+"Source Code" = "https://git.private.coffee/kumi/trackbert"
 
 [project.scripts]
 trackbert = "trackbert.__main__:main"

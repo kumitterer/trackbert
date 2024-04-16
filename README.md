@@ -1,6 +1,9 @@
 # Trackbert
 
-A simple Python script for tracking shipments, primarily through [KeyDelivery](https://kd100.com).
+[![Support Private.coffee!](https://shields.private.coffee/badge/private.coffee-support%20us!-pink?logo=coffeescript)](https://private.coffee)
+ [![PyPI version](https://shields.private.coffee/pypi/v/trackbert?color=green)](https://pypi.org/project/trackbert/)
+
+A Python application for tracking shipments, primarily through [KeyDelivery](https://kd100.com).
 
 If your system provides `notify-send`, you will get a desktop notification when the status of your shipment changes.
 

@@ -3,8 +3,8 @@ import subprocess
 import time
 import importlib
 import asyncio
+import importlib.metadata
 
-import setuptools.metadata
 import sqlalchemy.exc
 
 from pathlib import Path

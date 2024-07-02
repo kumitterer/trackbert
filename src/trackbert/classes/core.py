@@ -74,9 +74,10 @@ class Core:
         logging.debug("Finding external notifiers")
         notifiers = []
 
-        for entry_point in importlib.metadata.entry_points().get(
-            "trackbert.notifiers", []
-        ):
+        for entry_point in importlib.metadata.entry_points():
+            if entry_point.group != "trackbert.notifiers":
+                continue
+
             logging.debug(f"Considering external notifier {entry_point.name}")
 
             try:
@@ -149,9 +150,10 @@ class Core:
 
         providers = []
 
-        for entry_point in importlib.metadata.entry_points().get(
-            "trackbert.providers", []
-        ):
+        for entry_point in importlib.metadata.entry_points():
+            if entry_point.group != "trackbert.providers":
+                continue
+
             logging.debug(f"Considering external provider {entry_point.name}")
 
             try:

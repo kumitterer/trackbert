@@ -1,5 +1,4 @@
 import logging
-import subprocess
 import time
 import importlib
 import asyncio
@@ -8,12 +7,11 @@ import importlib.metadata
 import sqlalchemy.exc
 
 from pathlib import Path
-from typing import Optional, Tuple, Never
+from typing import Optional, Never
 from os import PathLike
 from configparser import ConfigParser
 
 from .database import Database
-from .provider import BaseProvider
 
 
 class Core:
@@ -76,11 +74,13 @@ class Core:
         logging.debug("Finding external notifiers")
         notifiers = []
 
-        for entry_point in importlib.metadata.entry_points().get("trackbert.notifiers", []):
+        for entry_point in importlib.metadata.entry_points().get(
+            "trackbert.notifiers", []
+        ):
             logging.debug(f"Considering external notifier {entry_point.name}")
 
             try:
-                notifier = entry_point.load()
+                notifier_class = entry_point.load()
             except Exception as e:
                 logging.error(f"Error loading class {entry_point.name}: {e}")
                 continue
@@ -97,9 +97,7 @@ class Core:
                     notifiers.append(nobj)
 
             except Exception as e:
-                logging.error(
-                    f"Error loading notifier {notifier_class.__name__}: {e}"
-                )
+                logging.error(f"Error loading notifier {notifier_class.__name__}: {e}")
 
         return notifiers
 
@@ -151,7 +149,9 @@ class Core:
 
         providers = []
 
-        for entry_point in importlib.metadata.entry_points().get("trackbert.providers", []):
+        for entry_point in importlib.metadata.entry_points().get(
+            "trackbert.providers", []
+        ):
             logging.debug(f"Considering external provider {entry_point.name}")
 
             try:
@@ -188,9 +188,9 @@ class Core:
 
         for api_entry in sorted(self.providers, key=lambda x: x[1], reverse=True):
             api_carrier = api_entry[0]
-            priority = api_entry[1]
+            priority = api_entry[1]  # noqa: F841
             provider = api_entry[2]
-            name = api_entry[3] if len(api_entry) > 3 else None
+            name = api_entry[3] if len(api_entry) > 3 else None  # noqa: F841
 
             if api_carrier == "*" or api_carrier == carrier:
                 logging.debug(
@@ -282,8 +282,6 @@ class Core:
 
     async def start_loop_async(self) -> Never:
         logging.debug("Starting loop")
-
-        loop = asyncio.get_running_loop()
 
         while True:
             tasks = []

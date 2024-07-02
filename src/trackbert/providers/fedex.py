@@ -17,7 +17,7 @@ class FedEx(BaseProvider):
 
         try:
             all_results = response["output"]["completeTrackResults"][0]["trackResults"]
-            
+
             all_events = []
 
             for result in all_results:
@@ -30,9 +30,7 @@ class FedEx(BaseProvider):
             logging.error(f"Error getting events for {tracking_number}: {all_events}")
             return
 
-        events = sorted(
-            all_events, key=lambda x: x["date"], reverse=True
-        )
+        events = sorted(all_events, key=lambda x: x["date"], reverse=True)
 
         for event in events:
             event_time = parse(event["date"]).strftime("%Y-%m-%d %H:%M:%S")

@@ -1,4 +1,12 @@
-from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, event
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    create_engine,
+    ForeignKey,
+    event,
+)
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -6,7 +14,6 @@ from alembic.config import Config
 from alembic import command
 
 import json
-import time
 import logging
 
 from functools import wraps
@@ -57,8 +64,12 @@ class Database:
         self.engine = create_engine(database_uri, pool_size=20, max_overflow=20)
         self.session = scoped_session(sessionmaker(bind=self.engine))
 
-        event.listen(self.engine, "connect", lambda _, __: logging.debug("DB connected"))
-        event.listen(self.engine, "close", lambda _, __: logging.debug("DB connection closed"))
+        event.listen(
+            self.engine, "connect", lambda _, __: logging.debug("DB connected")
+        )
+        event.listen(
+            self.engine, "close", lambda _, __: logging.debug("DB connection closed")
+        )
 
         self.run_migrations()
 

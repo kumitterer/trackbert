@@ -15,7 +15,7 @@ class DPD(BaseProvider):
     def get_status(self, tracking_number, carrier):
         api = DPDAPI()
         status = api.tracking(tracking_number)
-        
+
         events = status["data"][0]["lifecycle"]["entries"]
 
         for event in events:

@@ -1,6 +1,5 @@
 from ..classes.provider import BaseProvider
 from ..classes.database import Event
-from ..classes.http import HTTPRequest
 
 from pykeydelivery import KeyDelivery as KeyDeliveryAPI
 
@@ -20,8 +19,7 @@ class KeyDelivery(BaseProvider):
                 f"Got events for {tracking_number}: {len(all_events['data']['items'])}"
             )
         except KeyError:
-            logging.error(
-                f"Error getting events for {tracking_number}: {all_events}")
+            logging.error(f"Error getting events for {tracking_number}: {all_events}")
             return
 
         events = sorted(
@@ -40,11 +38,10 @@ class KeyDelivery(BaseProvider):
         try:
             response = self.api.list_carriers()
             carriers = [
-                (carrier["code"], 1, carrier["name"])
-                for carrier in response["data"]
+                (carrier["code"], 1, carrier["name"]) for carrier in response["data"]
             ]
             return carriers
-        except:
+        except Exception:
             return [
                 ("*", 1),
             ]

@@ -1,16 +1,10 @@
 from pathlib import Path
 from tabulate import tabulate
 
-import json
-import time
-import subprocess
 import argparse
-import logging
 import asyncio
 
-from typing import Tuple, Never, Optional
 
-from .classes.database import Database
 from .classes.core import Core
 
 
@@ -116,7 +110,9 @@ def main():
                 if not any(
                     [
                         others[1] > provider[1]
-                        for others in filter(lambda x: x[0] == provider[0], tracker.providers)
+                        for others in filter(
+                            lambda x: x[0] == provider[0], tracker.providers
+                        )
                     ]
                 )
             ]
@@ -127,9 +123,8 @@ def main():
 
     if args.tracking_number is not None and args.carrier is not None:
         if (
-            (shipment := tracker.db.get_shipment(args.tracking_number))
-            and not args.update
-        ):
+            shipment := tracker.db.get_shipment(args.tracking_number)
+        ) and not args.update:
             print(f"Shipment {args.tracking_number} already exists. Use -u to update.")
             exit(1)
 
@@ -143,7 +138,9 @@ def main():
             exit(0)
 
         if not shipment and args.update:
-            print(f"Shipment {args.tracking_number} does not exist. Remove -u to create.")
+            print(
+                f"Shipment {args.tracking_number} does not exist. Remove -u to create."
+            )
             exit(1)
 
         if not shipment and not args.update:

@@ -3,7 +3,6 @@ from ..classes.database import Event
 
 import json
 
-from dateutil.parser import parse
 from glsapi.classes.api import GLSAPI
 
 

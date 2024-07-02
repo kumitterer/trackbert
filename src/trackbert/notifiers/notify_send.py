@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class NotifySend(BaseNotifier):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         pass
 
     def notify(

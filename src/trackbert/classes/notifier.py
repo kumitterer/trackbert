@@ -1,5 +1,5 @@
 class BaseNotifier:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         pass
 
     def notify(self, title: str, message: str, urgent: bool = False) -> None:

@@ -7,8 +7,8 @@ from ..classes.notifier import BaseNotifier
 
 
 class Matrix(BaseNotifier):
-    def __init__(self, config: Dict[str, Any], *args, **kwargs):
-        self.config = config
+    def __init__(self, **kwargs):
+        self.config = kwargs["config"]
 
     def enabled(self) -> bool:
         return bool(self.config)
